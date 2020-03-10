@@ -9,6 +9,12 @@ class Request implements RequestInterface {
 		$this->method = $method;
 	}
 
+	/**
+	 *	[
+	 *		'event' => ['connect', 'disconnect', 'start', 'stop', 'die', 'destroy'],
+	 *		'type' => ['container', 'network']
+	 *	]
+	 */
 	public function filters(array $filters) {
 		$this->filters = $filters;
 	}

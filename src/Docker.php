@@ -7,25 +7,25 @@ use \Docker\Response\ResponseStream;
 use \Docker\Response\Response;
 
 class Docker {
+	static $docker = null;
+
+	private $connector;
 	private $loop;
 
-	function __construct($loop) {
+	function __construct($connector, $loop) {
+		$this->connector = $connector;
 		$this->loop = $loop;
 	}
 
-	/**
-	 *	[
-	 *		'event' => ['connect', 'disconnect', 'start', 'stop', 'die', 'destroy'],
-	 *		'type' => ['container', 'network']
-	 *	]
-	 */
-	function request($connector, RequestInterface $oRequest): ResponseStream {
+	function request(RequestInterface $oRequest): ResponseStream {
+		$connector = $this->connector;
 		$client = new Client($this->loop, $connector);
 
 		$oResponse = new Response();
 		
 		$uri = $oRequest->getUri();
 		if ($connector instanceof \React\Socket\FixedUriConnector) {
+			// костыль для unix socket
 			$uri = 'http://docker' . $uri;
 		}
 		$request = $client->request('GET', $uri);
@@ -34,8 +34,10 @@ class Docker {
 		    $response->on('data', function ($sChunk) use ($oResponse) {
 		        $aEvent = json_decode($sChunk, true);
 		        if (is_array($aEvent)) {
-		        	$oResponse->emit($aEvent['Type'], [Response::Factory($aEvent)]);
-		        	$oResponse->emit('all', [Response::Factory($aEvent)]);
+		        	if (!empty($aEvent['Type'])) {
+		        		$oResponse->emit($aEvent['Type'], [Response::Factory($aEvent)]);
+		        	}
+		        	$oResponse->emit('*', [Response::Factory($aEvent)]);
 		        }
 		    });
 		    $response->on('end', function() use ($connector, $oResponse) {
@@ -54,5 +56,14 @@ class Docker {
 		$request->end();
 
 		return $oResponse;
+	}
+
+	static function Factory($connector, $loop) {
+		static::$docker = new static($connector, $loop);
+		return static::$docker;
+	}
+
+	static function Instance() {
+		return static::$docker;
 	}
 }
