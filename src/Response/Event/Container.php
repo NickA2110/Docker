@@ -1,7 +1,9 @@
 <?php
-namespace Docker\Event;
+namespace Docker\Response\Event;
 
-class Container extends Common implements EventInterface {
+use Docker\Response\ResponseInterface;
+
+class Container extends Common implements ResponseInterface {
 	public $id; // ид контейнера
 	public $image; // имя образа
 	public $name; // имя контейнера

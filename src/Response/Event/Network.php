@@ -1,7 +1,9 @@
 <?php
-namespace Docker\Event;
+namespace Docker\Response\Event;
 
-class Network extends Common implements EventInterface {
+use Docker\Response\ResponseInterface;
+
+class Network extends Common implements ResponseInterface {
 	public $id; // id сети
 	public $name; // имя сети
 	public $type; // тип сети
