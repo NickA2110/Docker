@@ -1,0 +1,11 @@
+{
+    "name": "magneex/docker",
+    "require": {
+        "react/http-client": "^0.5.10"
+    },
+    "autoload": {
+    	"psr-4": {
+    		"Docker\\": "src"
+    	}
+    }
+}
